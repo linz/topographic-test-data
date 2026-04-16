@@ -13,5 +13,5 @@ jobs:
       changed_datasets_only: false
       output: s3://linz-topography-nonprod/
       kart_version: pr-120
-      strategy: ${{ (github.ref == 'refs/heads/master' && github.event_name == 'push') && format('latest,date,commit={0}', github.sha) || format('commit={0}', github.sha) }}
+      strategy: ${{ (github.ref == 'refs/heads/master' && github.event_name == 'push') && 'latest,date' || format('commit={0}', github.sha) }}
     secrets: inherit
