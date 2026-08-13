@@ -1,0 +1,28 @@
+name: pr-review
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  data-review:
+    uses: linz/topographic-system/.github/workflows/data-review.yml@master
+    with:
+      runs_on: ubuntu-latest_8core
+      environment: nonprod
+      changed_datasets_only: false
+      output: s3://linz-topography-nonprod/
+      # `github.sha` is the ephemeral merge commit on pull requests, use the head commit instead
+      strategy: ${{ (github.ref == 'refs/heads/master' && github.event_name == 'push') && 'latest,date' || format('commit={0}', github.event.pull_request.head.sha || github.sha) }}
+      data: ${{ format('s3://linz-topography-scratch-nonprod/github-cache/commit/{0}-{1}/', github.event.pull_request.head.sha || github.sha, github.run_id) }}
+    secrets: inherit
+
+  visual-diff:
+    needs: data-review
+    uses: linz/topographic-system/.github/workflows/visual-diff.yml@master
+    with:
+      environment: nonprod
+      map_version: latest
+      project: https://d1jzh93b1t1cv.cloudfront.net/qgis/nztopo50/latest/nztopo50.json
+    secrets: inherit
