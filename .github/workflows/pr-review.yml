@@ -9,7 +9,7 @@ jobs:
   data-review:
     uses: linz/topographic-system/.github/workflows/data-review.yml@master
     with:
-      runs_on: ubuntu-latest_8core
+      runs_on: ubuntu-latest
       environment: nonprod
       changed_datasets_only: false
       output: s3://linz-topography-nonprod/
