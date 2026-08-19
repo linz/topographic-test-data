@@ -15,7 +15,6 @@ jobs:
       output: s3://linz-topography-nonprod/
       # `github.sha` is the ephemeral merge commit on pull requests, use the head commit instead
       strategy: ${{ (github.ref == 'refs/heads/master' && github.event_name == 'push') && 'latest,date' || format('commit={0}', github.event.pull_request.head.sha || github.sha) }}
-      data: ${{ format('s3://linz-topography-scratch-nonprod/github-cache/commit/{0}-{1}/', github.event.pull_request.head.sha || github.sha, github.run_id) }}
     secrets: inherit
 
   visual-diff:
