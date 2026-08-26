@@ -24,4 +24,6 @@ jobs:
       environment: nonprod
       map_version: latest
       project: https://d1jzh93b1t1cv.cloudfront.net/qgis/nztopo50/latest/nztopo50.json
+      # visual diff must read the same data the review just published
+      strategy: ${{ github.event_name == 'pull_request' && format('commit={0}', github.event.pull_request.head.sha) || '' }}
     secrets: inherit
