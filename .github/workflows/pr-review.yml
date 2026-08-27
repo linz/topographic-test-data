@@ -6,15 +6,33 @@ on:
       - master
 
 jobs:
+  # one run date, shared by every step that needs a date
+  strategy:
+    runs-on: ubuntu-latest
+    outputs:
+      data: ${{ steps.init.outputs.data }}
+    steps:
+      - id: init
+        env:
+          # `github.sha` is the ephemeral merge commit on pull requests, use the head commit instead
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ "${{ github.event_name }}" = 'push' ] && [ "${{ github.ref }}" = 'refs/heads/master' ]; then
+            NOW=$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)
+            echo "data=latest,date=$NOW" >> "$GITHUB_OUTPUT"
+          else
+            echo "data=commit=$SHA" >> "$GITHUB_OUTPUT"
+          fi
+
   data-review:
+    needs: strategy
     uses: linz/topographic-system/.github/workflows/data-review.yml@master
     with:
       runs_on: ubuntu-latest
       environment: nonprod
       changed_datasets_only: false
       output: s3://linz-topography-nonprod/
-      # `github.sha` is the ephemeral merge commit on pull requests, use the head commit instead
-      strategy: ${{ (github.ref == 'refs/heads/master' && github.event_name == 'push') && format('latest,date={0}', github.event.head_commit.timestamp) || format('commit={0}', github.event.pull_request.head.sha || github.sha) }}
+      strategy: ${{ needs.strategy.outputs.data }}
     secrets: inherit
 
   visual-diff:
